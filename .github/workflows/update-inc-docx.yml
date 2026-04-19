@@ -1,9 +1,9 @@
 name: Sync Docx Files
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   schedule:
     - cron: "10 10 * * 2"
   workflow_dispatch:
@@ -86,7 +86,9 @@ jobs:
         # if: github.event.schedule == '0 4 * * *'
         run: |
           pushd $PATH_CODE &&
-          bash scripts/run-dl-files-inc.sh $COUNT_DATA .. ../$PATH_DATA
+          bash scripts/run-sync-files.sh \
+              -f docx -m inc -c $COUNT_DATA \
+              --base-dir .. --meta-dir ../$PATH_DATA
           popd
 
       - name: Git auto commit
@@ -98,4 +100,4 @@ jobs:
           commit_message: Automated update
           # commit_options: '--no-verify --signoff'
           push_options: "--force"
-          file_pattern: "*.docx *.doc *.rtf *.docm *.jsonl"
+          # file_pattern: "*.docx *.doc *.rtf *.docm *.jsonl"
