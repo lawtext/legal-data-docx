@@ -34,7 +34,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.HPW_APP_CLIENT_ID }}
+          client-id: ${{ vars.HPW_APP_CLIENT_ID }}
           private-key: ${{ secrets.HPW_APP_PRIVATE_KEY }}
           owner: ${{ secrets.HPW_REPO }}
 
