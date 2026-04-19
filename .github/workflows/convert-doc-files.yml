@@ -1,9 +1,9 @@
 name: Convert Doc Files
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   schedule:
     - cron: "15 10 * * 2"
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
           echo "Found $count matching lines"
           if [ "$count" -eq 0 ]; then
             echo "No matching lines found, exiting workflow."
-            # exit 0
+            exit 0
           fi
 
       - name: Generate Token
