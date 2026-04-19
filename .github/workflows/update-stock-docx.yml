@@ -1,9 +1,9 @@
 name: Update Docx Files
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   schedule:
     - cron: "10 10 * * 4,6"
   workflow_dispatch:
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   process:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: write
     env:
@@ -24,7 +24,7 @@ jobs:
       PATH_CODE: code
       # REPO_DATA: ${{ vars.REPO_DATA }}
       # PATH_DATA: data
-      COUNT_DATA: ${{ vars.COUNT_DATA || 10 }}
+      COUNT_STOCK: ${{ vars.COUNT_STOCK || 10 }}
       COUNT_EXTRA: ${{ vars.COUNT_EXTRA || 0 }}
 
     steps:
@@ -79,7 +79,7 @@ jobs:
         run: |
           pushd $PATH_CODE &&
           bash scripts/run-sync-files.sh \
-              -f docx -m stock -c $COUNT_DATA -e $COUNT_EXTRA \
+              -f docx -m stock -c $COUNT_STOCK -e $COUNT_EXTRA \
               --base-dir .. --meta-dir ../$PATH_DATA
           popd
 
