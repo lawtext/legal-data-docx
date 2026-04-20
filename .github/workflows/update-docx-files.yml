@@ -5,8 +5,9 @@ on:
   #   branches:
   #     - main
   schedule:
-    - cron: "10 10 * * 2" # weekly update
-    - cron: "5 5 5 * *" # monthly update
+    - cron: "0 10 * * 1"
+    - cron: "0 10 * * 2,4,6"
+    # - cron: "5 5 5 * *"
   workflow_dispatch:
 
 concurrency:
@@ -16,7 +17,7 @@ concurrency:
 jobs:
   process:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     permissions:
       contents: write
     env:
@@ -26,6 +27,8 @@ jobs:
       REPO_DATA: ${{ vars.REPO_DATA }}
       PATH_DATA: data
       COUNT_DATA: ${{ vars.COUNT_DATA || 10 }}
+      COUNT_STOCK: ${{ vars.COUNT_STOCK || 10 }}
+      COUNT_EXTRA: ${{ vars.COUNT_EXTRA || 0 }}
 
     steps:
       - name: Checkout
@@ -64,18 +67,19 @@ jobs:
         with:
           repository: ${{ env.USER }}/${{ env.REPO_CODE }}
           path: ${{ env.PATH_CODE }}
+          token: ${{ steps.app-token2.outputs.token }}
           fetch-depth: 1
           ref: ${{ github.ref }}
-          token: ${{ steps.app-token2.outputs.token }}
 
       - name: Checkout Data
+        if: github.event.schedule != '0 10 * * 2,4,6'
         uses: actions/checkout@v6
         with:
           repository: ${{ env.USER }}/${{ env.REPO_DATA }}
           path: ${{ env.PATH_DATA }}
+          token: ${{ steps.app-token2.outputs.token }}
           fetch-depth: 1
           ref: ${{ github.ref }}
-          token: ${{ steps.app-token2.outputs.token }}
 
       - name: Python Env
         uses: actions/setup-python@v6
@@ -87,16 +91,27 @@ jobs:
         with:
           working-directory: ${{ env.PATH_CODE }}
 
-      - name: Update parameter
-        if: github.event.schedule == '5 5 5 * *'
-        run: echo "COUNT_DATA=250" >> $GITHUB_ENV
+      # - name: Update parameter
+      #   if: github.event.schedule == '5 5 5 * *'
+      #   run: echo "COUNT_DATA=250" >> $GITHUB_ENV
 
-      - name: Run script page
-        # if: github.event.schedule == '0 4 * * *'
+      - name: Run Incremental mode
+        if: github.event.schedule != '0 10 * * 2,4,6'
         run: |
           pushd $PATH_CODE &&
           bash scripts/run-sync-files.sh \
-              -f docx -m inc -c $COUNT_DATA \
+              -f docx -m inc \
+              -c $COUNT_DATA \
+              --base-dir .. --meta-dir ../$PATH_DATA
+          popd
+
+      - name: Run stock mode
+        if: github.event.schedule == '0 10 * * 2,4,6'
+        run: |
+          pushd $PATH_CODE &&
+          bash scripts/run-sync-files.sh \
+              -f docx -m stock \
+              -c $COUNT_STOCK -e $COUNT_EXTRA \
               --base-dir .. --meta-dir ../$PATH_DATA
           popd
 

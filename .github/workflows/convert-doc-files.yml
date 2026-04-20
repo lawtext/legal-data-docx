@@ -5,7 +5,7 @@ on:
   #   branches:
   #     - main
   schedule:
-    - cron: "15 10 * * 2"
+    - cron: "0 1 * * 3"
   workflow_dispatch:
 
 concurrency:
@@ -51,9 +51,9 @@ jobs:
         with:
           repository: ${{ env.USER }}/${{ env.REPO_CODE }}
           path: ${{ env.PATH_CODE }}
-          fetch-depth: 1
-          ref: ${{ github.ref }}
           token: ${{ steps.app-token2.outputs.token }}
+          fetch-depth: 1
+          # ref: ${{ github.ref }}
 
       - name: Python Env
         uses: actions/setup-python@v6
@@ -84,7 +84,6 @@ jobs:
         run: libreoffice --version
 
       - name: Run script page
-        # if: github.event.schedule == '0 4 * * *'
         run: |
           pushd $PATH_CODE &&
           bash scripts/run-convert-docx.sh $COUNT_DOC .. &&
