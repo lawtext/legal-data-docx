@@ -39,12 +39,16 @@ jobs:
           private-key: ${{ secrets.HPW_APP_PRIVATE_KEY }}
           owner: ${{ secrets.HPW_REPO }}
 
-      - name: Set up .netrc
+      # - name: Set up .netrc
+      #   run: |
+      #     echo "machine github.com" > ~/.netrc
+      #     echo "login x-access-token" >> ~/.netrc
+      #     echo "password ${{ steps.app-token.outputs.token }}" >> ~/.netrc
+      #     chmod 600 ~/.netrc
+      - name: Register token
         run: |
-          echo "machine github.com" > ~/.netrc
-          echo "login x-access-token" >> ~/.netrc
-          echo "password ${{ steps.app-token.outputs.token }}" >> ~/.netrc
-          chmod 600 ~/.netrc
+          echo "${{ steps.app-token.outputs.token }}" | gh auth login --with-token
+          gh auth setup-git
 
       - name: Generate Token2
         id: app-token2
@@ -79,7 +83,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v8.0.0
+        uses: astral-sh/setup-uv@v8.1.0
         with:
           working-directory: ${{ env.PATH_CODE }}
 
@@ -104,5 +108,5 @@ jobs:
           commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
           commit_message: Automated update
           # commit_options: '--no-verify --signoff'
-          push_options: "--force"
+          # push_options: "--force"
           # file_pattern: "*.docx *.doc *.rtf *.docm *.jsonl"
