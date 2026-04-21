@@ -13,8 +13,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check_jsonl.outputs.skip }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Check JSONL file
+      id: check_jsonl
+      run: |
+        count=$(jq -c 'select((.type == ".doc" or .type == ".rtf") and .alias == null and .ver == null)' *.jsonl | wc -l)
+        echo "Found $count matching lines"
+        if [ "$count" -eq 0 ]; then
+          echo "No matching lines found"
+          echo "skip=true" >> $GITHUB_ENV
+        else
+          echo "skip=false" >> $GITHUB_ENV
+        fi
+
   process:
     runs-on: ubuntu-latest
+    needs: check
+    if: ${{ needs.check.outputs.skip == 'false' }}
+
     timeout-minutes: 30
     permissions:
       contents: write
@@ -27,15 +51,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Check JSONL file
-        run: |
-          count=$(jq -c 'select((.type == ".doc" or .type == ".rtf") and .alias == null)' *.jsonl | wc -l)
-          echo "Found $count matching lines"
-          if [ "$count" -eq 0 ]; then
-            echo "No matching lines found, exiting workflow."
-            exit 0
-          fi
 
       - name: Generate Token
         id: app-token2
