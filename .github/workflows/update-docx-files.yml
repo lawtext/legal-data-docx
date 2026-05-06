@@ -72,7 +72,7 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Checkout Data
-        if: github.event.schedule != '0 10 * * 2,4,6'
+        if: github.event.schedule != '0 3 * * 2,4,6'
         uses: actions/checkout@v6
         with:
           repository: ${{ env.USER }}/${{ env.REPO_DATA }}
@@ -96,7 +96,7 @@ jobs:
       #   run: echo "COUNT_DATA=250" >> $GITHUB_ENV
 
       - name: Run Incremental mode
-        if: github.event.schedule != '0 10 * * 2,4,6'
+        if: github.event.schedule != '0 3 * * 2,4,6'
         run: |
           pushd $PATH_CODE &&
           bash scripts/run-sync-files.sh \
@@ -106,7 +106,7 @@ jobs:
           popd
 
       - name: Run stock mode
-        if: github.event.schedule == '0 10 * * 2,4,6'
+        if: github.event.schedule == '0 3 * * 2,4,6'
         run: |
           pushd $PATH_CODE &&
           bash scripts/run-sync-files.sh \
